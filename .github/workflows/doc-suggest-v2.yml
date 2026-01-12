@@ -2,26 +2,13 @@ name: Documentation Update Suggestion
 
 on:
   workflow_call:
-    inputs:
-      target_docs:
-        description: 'Target documentation files to check (comma-separated)'
-        type: string
-        default: 'README.md,CHANGELOG.md,CLAUDE.md'
-      timeout_minutes:
-        description: 'Workflow timeout in minutes'
-        type: number
-        default: 10
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN:
-        description: 'Claude Code OAuth token for authentication'
         required: true
 
 jobs:
   suggest-doc-updates:
-    if: github.event.pull_request.user.login != 'github-actions[bot]'
-
-    runs-on: ubuntu-24.04
-    timeout-minutes: ${{ inputs.timeout_minutes }}
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
@@ -30,8 +17,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
 
       - name: Suggest Documentation Updates
         uses: anthropics/claude-code-action@v1
@@ -39,19 +24,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
-            Analyze PR #${{ github.event.pull_request.number }} in ${{ github.repository }}.
-            Title: ${{ github.event.pull_request.title }}
-
-            Check if documentation updates are needed for: ${{ inputs.target_docs }}
-
-            Steps:
-            1. Run: gh pr diff ${{ github.event.pull_request.number }}
-            2. Identify changes (new features, breaking changes, bug fixes)
-            3. Check if docs need updates
-
-            If updates needed, post a comment using:
-            gh pr comment ${{ github.event.pull_request.number }} --body "..."
-
-            If no updates needed, exit silently.
+            Analyze this PR and suggest documentation updates if needed.
+            Use gh pr diff to see changes, then post a comment if updates are needed.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
