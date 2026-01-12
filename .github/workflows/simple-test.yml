@@ -1,0 +1,14 @@
+name: Simple Test
+
+on:
+  workflow_call:
+    secrets:
+      TEST_SECRET:
+        required: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo
+        run: echo "Reusable workflow works!"
