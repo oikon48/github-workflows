@@ -1,0 +1,99 @@
+name: Documentation Update Suggestion
+
+on:
+  workflow_call:
+    inputs:
+      target_docs:
+        description: 'Target documentation files to check (comma-separated)'
+        type: string
+        default: 'README.md,CHANGELOG.md,CLAUDE.md'
+      timeout_minutes:
+        description: 'Workflow timeout in minutes'
+        type: number
+        default: 10
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN:
+        description: 'Claude Code OAuth token for authentication'
+        required: true
+
+jobs:
+  suggest-doc-updates:
+    # Prevent bot from triggering itself
+    if: github.event.pull_request.user.login != 'github-actions[bot]'
+
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Suggest Documentation Updates
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR TITLE: ${{ github.event.pull_request.title }}
+
+            ## Task
+            Analyze code changes in this PR and suggest documentation updates if needed.
+
+            ## Target Documents
+            Check these files for needed updates: ${{ inputs.target_docs }}
+            - README.md: Project overview, usage, API examples
+            - CHANGELOG.md: Version history, notable changes
+            - CLAUDE.md: AI assistant instructions, project conventions
+
+            ## Steps
+            1. Get PR diff: `gh pr diff ${{ github.event.pull_request.number }}`
+            2. Identify changes: new features, breaking changes, bug fixes, refactoring
+            3. Check each target document (if exists) for needed updates
+
+            ## Decision Criteria
+            - README.md: New features, API changes, usage examples
+            - CHANGELOG.md: User-facing changes (features, fixes, breaking changes)
+            - CLAUDE.md: New patterns, conventions, project structure changes
+
+            ## Output Rules
+            - If NO updates needed: Exit silently (no comment)
+            - If updates ARE needed: Post ONE PR comment with all suggestions
+
+            ## Comment Format (only if updates needed)
+            ```
+            ## 📝 Documentation Update Suggestions
+
+            Based on this PR, the following documentation updates may be needed:
+
+            ### [Document Name]
+
+            **Suggested changes:**
+            - [Specific suggestion]
+
+            **Example:**
+            ```[lang]
+            [What to add/change]
+            ```
+
+            ---
+            *Automated suggestion by Claude Code*
+            ```
+
+            Use `gh pr comment ${{ github.event.pull_request.number }} --body "..."` to post.
+
+            ## Important
+            - Be concise: Only necessary updates
+            - Be specific: Exact text/code to add
+            - Silent exit: If no updates needed, do NOT post any comment
+
+          claude_args: '--allowed-tools "Bash(gh pr diff:*),Bash(gh pr comment:*),Read,Glob"'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
