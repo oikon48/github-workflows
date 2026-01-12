@@ -44,7 +44,7 @@ jobs:
 
 | Name | Description |
 |------|-------------|
-| `CLAUDE_CODE_OAUTH_TOKEN` | Claude Code OAuth token (generate with `claude mcp add-oauth anthropic`) |
+| `CLAUDE_CODE_OAUTH_TOKEN` | Claude Code OAuth token (generate with `/install-github-app`) |
 
 ## Important: Permissions Requirements
 
@@ -104,7 +104,7 @@ jobs:
 
 1. Add `CLAUDE_CODE_OAUTH_TOKEN` to your repository secrets
    ```bash
-   claude mcp add-oauth anthropic
+   /install-github-app
    ```
 2. Create a workflow file that calls the reusable workflow (see Usage above)
 3. Customize `paths` trigger as needed for your project
