@@ -48,12 +48,22 @@ jobs:
 
             Steps:
             1. Run: gh pr diff ${{ github.event.pull_request.number }}
-            2. Identify changes (new features, breaking changes, bug fixes)
-            3. Check if docs need updates
+            2. Identify ALL changes (new features, breaking changes, bug fixes, API changes)
+            3. For EACH target doc file, check if updates are needed:
+               - CHANGELOG.md: New features, fixes, breaking changes
+               - README.md: User-facing changes, new requirements, usage changes
+               - CLAUDE.md: Architecture changes, service descriptions, patterns
+            4. Read each target doc file to check current content accuracy
 
-            If updates needed, post a comment using:
+            IMPORTANT: List ALL documentation updates needed in a SINGLE comment.
+            Do not prioritize - report everything that needs updating at once.
+
+            If updates needed, post ONE comprehensive comment using:
             gh pr comment ${{ github.event.pull_request.number }} --body "..."
 
-            If no updates needed, exit silently.
+            Format the comment with sections for each file that needs updates.
+            Mark files that don't need updates as "✅ No changes needed".
+
+            If no updates needed for any file, exit silently.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
