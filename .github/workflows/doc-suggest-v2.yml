@@ -9,22 +9,12 @@ on:
 jobs:
   suggest-doc-updates:
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       pull-requests: write
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Suggest Documentation Updates
-        uses: anthropics/claude-code-action@v1
+      - uses: actions/checkout@v6
+      - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: |
-            Analyze this PR and suggest documentation updates if needed.
-            Use gh pr diff to see changes, then post a comment if updates are needed.
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          prompt: "Hello world test"
